@@ -94,11 +94,7 @@ function _config_packages(argv, packages)
     end
     local runtimes = argv.runtimes or argv.vs_runtime
     if runtimes then
-        if is_host("windows") then
-            table.insert(config_argv, "--vs_runtime=" .. runtimes)
-        else
-            table.insert(config_argv, "--runtimes=" .. runtimes)
-        end
+        table.insert(config_argv, "--runtimes=" .. runtimes)
     end
     if argv.xcode_sdkver then
         table.insert(config_argv, "--xcode_sdkver=" .. argv.xcode_sdkver)
@@ -262,7 +258,7 @@ function _package_is_supported(argv, packagename)
 end
 
 function append_package_version(packages, line)
-    local version = line:match("add_versions%(\"(.-)\"") or line:match("package:add%(\"versions\",%s*\"(.-)\"")
+    local version = line:match("add_versions%(['\"](.-)['\"]") or line:match("package:add%(['\"]versions['\"],%s*['\"](.-)['\"]")
     if version then
         if version:find(":", 1, true) then
             version = version:split(":")[2]
@@ -288,9 +284,9 @@ function get_modified_packages()
                 table.insert(new_packages, package)
                 table.insert(old_packages, package)
             end
-        elseif line:startswith("+") and (line:find("add_versions", 1, true) or line:find("package:add(\"versions\"", 1, true)) then
+        elseif line:startswith("+") and (line:find("add_versions", 1, true) or line:find("package:add%((['\"])versions%1")) then
             append_package_version(new_packages, line)
-        elseif line:startswith("-") and (line:find("add_versions", 1, true) or line:find("package:add(\"versions\"", 1, true)) then
+        elseif line:startswith("-") and (line:find("add_versions", 1, true) or line:find("package:add%((['\"])versions%1")) then
             append_package_version(old_packages, line)
         end
     end
